@@ -1,0 +1,37 @@
+name: chart_flow
+description: A Flutter app for trading review with image-first approach.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  riverpod: ^2.4.9
+  flutter_riverpod: ^2.4.9
+  go_router: ^13.0.0
+  drift: ^2.14.1
+  sqlite3_flutter_libs: ^0.5.18
+  path_provider: ^2.1.1
+  path: ^1.8.3
+  uuid: ^4.2.2
+  image_picker: ^1.0.5
+  intl: ^0.18.1
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  drift_dev: ^2.14.1
+  build_runner: ^2.4.7
+  freezed: ^2.4.6
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
