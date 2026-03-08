@@ -43,3 +43,11 @@ app.*.map.json
 # Generated files
 lib/**.g.dart
 lib/**.freezed.dart
+
+# Local environment caches
+android/.gradle/
+android/build/
+android/local.properties
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
