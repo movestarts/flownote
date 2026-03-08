@@ -1,3 +1,4 @@
+import 'package:chart_flow/app/l10n/app_strings.dart';
 import 'package:chart_flow/core/domain/entities.dart';
 import 'package:chart_flow/core/widgets/empty_state_widget.dart';
 import 'package:chart_flow/features/notes/providers/note_providers.dart';
@@ -15,7 +16,7 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chart Flow'),
+        title: Text(AppStrings.of(ref, 'appName')),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -30,9 +31,9 @@ class HomePage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildQuickActions(context),
+          _buildQuickActions(ref, context),
           const SizedBox(height: 24),
-          _sectionTitle(context, 'Recent Notes',
+          _sectionTitle(ref, context, AppStrings.of(ref, 'homeRecent'),
               onViewAll: () => context.push('/flow')),
           const SizedBox(height: 12),
           SizedBox(
@@ -68,8 +69,9 @@ class HomePage extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           _sectionTitle(
+            ref,
             context,
-            'Favorites',
+            AppStrings.of(ref, 'homeFavorites'),
             onViewAll: () => context.push('/flow',
                 extra: const NoteQuery(favoriteOnly: true)),
           ),
@@ -110,12 +112,12 @@ class HomePage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/create'),
         icon: const Icon(Icons.add_photo_alternate),
-        label: const Text('Create'),
+        label: Text(AppStrings.of(ref, 'create')),
       ),
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
+  Widget _buildQuickActions(WidgetRef ref, BuildContext context) {
     return Column(
       children: [
         Row(
@@ -123,7 +125,7 @@ class HomePage extends ConsumerWidget {
             Expanded(
               child: _QuickActionCard(
                 icon: Icons.view_carousel,
-                title: 'Flow',
+                title: AppStrings.of(ref, 'flow'),
                 subtitle: 'Swipe notes vertically',
                 onTap: () => context.push('/flow'),
               ),
@@ -132,7 +134,7 @@ class HomePage extends ConsumerWidget {
             Expanded(
               child: _QuickActionCard(
                 icon: Icons.filter_alt_outlined,
-                title: 'Filter',
+                title: AppStrings.of(ref, 'filter'),
                 subtitle: 'Combine conditions',
                 onTap: () => context.push('/filter'),
               ),
@@ -142,21 +144,22 @@ class HomePage extends ConsumerWidget {
         const SizedBox(height: 12),
         _QuickActionCard(
           icon: Icons.label_outline,
-          title: 'Tags',
-          subtitle: 'Manage tags before creating notes',
+          title: AppStrings.of(ref, 'tags'),
+          subtitle: AppStrings.of(ref, 'manageTagsHint'),
           onTap: () => context.push('/tags'),
         ),
       ],
     );
   }
 
-  Widget _sectionTitle(BuildContext context, String title,
+  Widget _sectionTitle(WidgetRef ref, BuildContext context, String title,
       {required VoidCallback onViewAll}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: Theme.of(context).textTheme.titleMedium),
-        TextButton(onPressed: onViewAll, child: const Text('View All')),
+        TextButton(
+            onPressed: onViewAll, child: Text(AppStrings.of(ref, 'viewAll'))),
       ],
     );
   }

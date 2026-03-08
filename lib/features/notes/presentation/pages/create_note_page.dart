@@ -1,3 +1,4 @@
+import 'package:chart_flow/app/l10n/app_strings.dart';
 import 'dart:io';
 
 import 'package:chart_flow/core/domain/entities.dart';
@@ -227,11 +228,11 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Note'),
+        title: Text(AppStrings.of(ref, 'createNote')),
         actions: [
           TextButton(
             onPressed: _saving ? null : () => _saveNote(keepEditing: true),
-            child: const Text('Save & Next'),
+            child: Text(AppStrings.of(ref, 'saveAndNext')),
           ),
           TextButton(
             onPressed: _saving ? null : () => _saveNote(keepEditing: false),
@@ -241,7 +242,7 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save'),
+                : Text(AppStrings.of(ref, 'save')),
           ),
         ],
       ),
@@ -254,36 +255,40 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
               imagePath: _sourceImagePath,
               onTap: _pickImage,
               height: 220,
-              placeholder: const Center(child: Text('Tap to import image')),
+              placeholder:
+                  Center(child: Text(AppStrings.of(ref, 'importImage'))),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration:
+                  InputDecoration(labelText: AppStrings.of(ref, 'title')),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _contentController,
-              decoration: const InputDecoration(labelText: 'Content'),
+              decoration:
+                  InputDecoration(labelText: AppStrings.of(ref, 'content')),
               minLines: 2,
               maxLines: 4,
             ),
             const SizedBox(height: 12),
             tagsAsync.when(
               loading: () => const LinearProgressIndicator(),
-              error: (error, _) => Text('Load tags failed: $error'),
+              error: (error, _) =>
+                  Text('${AppStrings.of(ref, "loadTagsFailed")}: $error'),
               data: (tags) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Tags',
+                      Text(AppStrings.of(ref, 'tags'),
                           style: Theme.of(context).textTheme.titleSmall),
                       TextButton.icon(
                         onPressed: _openTagManager,
                         icon: const Icon(Icons.settings_outlined, size: 16),
-                        label: const Text('Manage Tags'),
+                        label: Text(AppStrings.of(ref, 'manageTags')),
                       ),
                     ],
                   ),
@@ -315,8 +320,8 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
                       Expanded(
                         child: TextField(
                           controller: _newTagController,
-                          decoration:
-                              const InputDecoration(hintText: 'Create new tag'),
+                          decoration: InputDecoration(
+                              hintText: AppStrings.of(ref, 'createNewTag')),
                         ),
                       ),
                       IconButton(
@@ -331,26 +336,28 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _symbolController,
-              decoration: const InputDecoration(labelText: 'Symbol'),
+              decoration:
+                  InputDecoration(labelText: AppStrings.of(ref, 'symbol')),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _timeframeController,
-              decoration: const InputDecoration(labelText: 'Timeframe'),
+              decoration:
+                  InputDecoration(labelText: AppStrings.of(ref, 'timeframe')),
             ),
             const SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Trade Time'),
+              title: Text(AppStrings.of(ref, 'tradeTime')),
               subtitle: Text(_tradeTime?.toLocal().toString() ?? 'Not set'),
               trailing: TextButton(
                 onPressed: _pickTradeDateTime,
-                child: const Text('Select'),
+                child: Text(AppStrings.of(ref, 'select')),
               ),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Favorite'),
+              title: Text(AppStrings.of(ref, 'favorite')),
               value: _isFavorite,
               onChanged: (value) => setState(() => _isFavorite = value),
             ),
