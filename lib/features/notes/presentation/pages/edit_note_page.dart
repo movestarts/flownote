@@ -50,13 +50,19 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
     );
     setState(() {
       _tradeTime = DateTime(
-          date.year, date.month, date.day, time?.hour ?? 0, time?.minute ?? 0);
+        date.year,
+        date.month,
+        date.day,
+        time?.hour ?? 0,
+        time?.minute ?? 0,
+      );
     });
   }
 
   Future<void> _save() async {
     final note = _loadedNote;
     if (note == null) return;
+
     setState(() => _saving = true);
     try {
       final repo = ref.read(noteRepositoryProvider);
@@ -80,8 +86,44 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
           updatedAt: DateTime.now(),
         ),
       );
+
       ref.read(notesRefreshTickProvider.notifier).state++;
       if (!mounted) return;
+      context.pop();
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _delete() async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除笔记?'),
+        content: const Text('删除后，这条笔记将不会再显示在列表中。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    setState(() => _saving = true);
+    try {
+      await ref.read(noteRepositoryProvider).deleteNote(widget.noteId);
+      ref.read(notesRefreshTickProvider.notifier).state++;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已删除笔记')),
+      );
       context.pop();
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -95,12 +137,17 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
+
         final note = snapshot.data;
         if (note == null) {
-          return const Scaffold(body: Center(child: Text('笔记不存在')));
+          return const Scaffold(
+            body: Center(child: Text('笔记不存在')),
+          );
         }
+
         if (_loadedNote == null) {
           _loadedNote = note;
           _titleController.text = note.title ?? '';
@@ -118,6 +165,14 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
           appBar: AppBar(
             title: const Text('编辑笔记'),
             actions: [
+              TextButton.icon(
+                onPressed: _saving ? null : _delete,
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                label: const Text(
+                  '删除',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
               TextButton(
                 onPressed: _saving ? null : _save,
                 child: const Text('保存'),

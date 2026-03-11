@@ -3,6 +3,7 @@ import 'package:chart_flow/app/theme/app_theme.dart';
 import 'package:chart_flow/app/l10n/app_strings.dart';
 import 'package:chart_flow/shared/providers/locale_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChartFlowApp extends ConsumerWidget {
@@ -17,6 +18,11 @@ class ChartFlowApp extends ConsumerWidget {
       title: AppStrings.of(ref, 'appName'),
       debugShowCheckedModeBanner: false,
       locale: locale,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       supportedLocales: const [Locale('en'), Locale('zh')],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

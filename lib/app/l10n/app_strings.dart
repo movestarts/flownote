@@ -1,5 +1,5 @@
+﻿import 'package:chart_flow/shared/providers/locale_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chart_flow/shared/providers/locale_provider.dart';
 
 class AppStrings {
   static const Map<String, Map<String, String>> _values = {

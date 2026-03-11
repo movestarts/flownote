@@ -41,6 +41,37 @@ class _FlowPageState extends ConsumerState<FlowPage> {
     ref.read(notesRefreshTickProvider.notifier).state++;
   }
 
+  Future<void> _deleteNote(Note note) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete note?'),
+        content: const Text('This note will be hidden from your note list.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true || !mounted) return;
+
+    final repository = ref.read(noteRepositoryProvider);
+    await repository.deleteNote(note.id);
+    ref.read(notesRefreshTickProvider.notifier).state++;
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Note deleted')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final notesAsync = ref.watch(notesByQueryProvider(widget.query));
@@ -87,6 +118,8 @@ class _FlowPageState extends ConsumerState<FlowPage> {
                   return _FlowCard(
                     note: note,
                     onToggleFavorite: () => _toggleFavorite(note),
+                    onEdit: () => context.push('/note/${note.id}/edit'),
+                    onDelete: () => _deleteNote(note),
                   );
                 },
               ),
@@ -97,7 +130,7 @@ class _FlowPageState extends ConsumerState<FlowPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -117,10 +150,14 @@ class _FlowPageState extends ConsumerState<FlowPage> {
 class _FlowCard extends StatelessWidget {
   final Note note;
   final VoidCallback onToggleFavorite;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const _FlowCard({
     required this.note,
     required this.onToggleFavorite,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -149,13 +186,30 @@ class _FlowCard extends StatelessWidget {
         ),
         Positioned(
           top: 16,
-          right: 16,
-          child: IconButton(
-            onPressed: onToggleFavorite,
-            icon: Icon(
-              note.isFavorite ? Icons.bookmark : Icons.bookmark_border,
-              color: Colors.white,
-            ),
+          right: 12,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _quickActionButton(
+                icon: note.isFavorite ? Icons.bookmark : Icons.bookmark_border,
+                label: note.isFavorite ? '已收藏' : '收藏',
+                onTap: onToggleFavorite,
+              ),
+              const SizedBox(height: 8),
+              _quickActionButton(
+                icon: Icons.edit_outlined,
+                label: '编辑',
+                onTap: onEdit,
+              ),
+              const SizedBox(height: 8),
+              _quickActionButton(
+                icon: Icons.delete_outline,
+                label: '删除',
+                onTap: onDelete,
+                foregroundColor: Colors.red.shade100,
+                borderColor: Colors.red.shade200.withValues(alpha: 0.65),
+              ),
+            ],
           ),
         ),
         Positioned(
@@ -218,13 +272,52 @@ class _FlowCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.45),
+        color: Colors.black.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: Colors.white24),
       ),
       child: Text(
         text,
         style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _quickActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color foregroundColor = Colors.white,
+    Color borderColor = Colors.white24,
+  }) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.45),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: foregroundColor),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: foregroundColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
