@@ -36,7 +36,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'edit',
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return EditNotePage(noteId: id);
+          final extra = state.extra;
+          List<String> batchNoteIds = const <String>[];
+
+          if (extra is List) {
+            batchNoteIds = extra.whereType<String>().toList();
+          } else if (extra is Map) {
+            final rawIds = extra['batchNoteIds'];
+            if (rawIds is List) {
+              batchNoteIds = rawIds.whereType<String>().toList();
+            }
+          }
+
+          return EditNotePage(noteId: id, batchNoteIds: batchNoteIds);
         },
       ),
       GoRoute(

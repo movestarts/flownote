@@ -1,4 +1,4 @@
-﻿import 'package:chart_flow/shared/providers/locale_provider.dart';
+import 'package:chart_flow/shared/providers/locale_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppStrings {
@@ -62,15 +62,25 @@ class AppStrings {
       'saveFailed': 'Save failed',
       'saveAndContinue': 'Save & Continue',
       'quickCreatePickImage': 'Tap to choose a screenshot',
+      'quickCreatePickImages': 'Tap to choose screenshots',
       'quickCreateHint': 'You can fill in details later',
       'quickCreateMode': 'Minimal capture mode',
       'quickCreateTip1': 'Capture first when timing is fleeting',
       'quickCreateTip2': 'You can complete details later',
       'quickCreateTip3': 'Supports consecutive quick captures',
+      'selectedCountPrefix': 'Selected',
+      'addMoreImages': 'Add more',
+      'batchSaveAndContinue': 'Batch Save & Continue',
+      'quickCreateNoValidImage': 'No accessible images to import.',
+      'batchImported': 'images imported',
+      'batchImportFailedAndRetained': 'images failed and were kept for retry',
       'later': 'Later',
       'editNow': 'Edit now',
+      'editFirst': 'Edit first',
       'goDetailedMode': 'Detailed mode',
       'selectImageFirst': 'Please select an image first.',
+      'imageNotAccessible': 'Image not accessible',
+      'imagesInaccessibleSuffix': 'images inaccessible',
     },
     'zh': {
       'appName': '图流复盘',
@@ -131,15 +141,25 @@ class AppStrings {
       'saveFailed': '保存失败',
       'saveAndContinue': '保存并继续',
       'quickCreatePickImage': '点击选择交易截图',
+      'quickCreatePickImages': '点击选择多张交易截图',
       'quickCreateHint': '其他信息可稍后补充',
       'quickCreateMode': '极简记录模式',
       'quickCreateTip1': '交易时机稍纵即逝，先截图保存',
       'quickCreateTip2': '保存后可随时补充详细信息',
       'quickCreateTip3': '支持连续快速记录多笔交易',
+      'selectedCountPrefix': '已选择',
+      'addMoreImages': '继续添加',
+      'batchSaveAndContinue': '批量保存并继续',
+      'quickCreateNoValidImage': '没有可用图片可导入，请重新选择。',
+      'batchImported': '张图片已导入',
+      'batchImportFailedAndRetained': '张图片导入失败，已保留待重试',
       'later': '稍后再说',
       'editNow': '立即补充',
+      'editFirst': '编辑第一条',
       'goDetailedMode': '详细信息模式',
       'selectImageFirst': '请先选择图片。',
+      'imageNotAccessible': '图片不可访问',
+      'imagesInaccessibleSuffix': '张图片不可访问',
     },
   };
 

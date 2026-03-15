@@ -5,11 +5,17 @@ import 'package:chart_flow/features/tags/providers/tag_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 
 class EditNotePage extends ConsumerStatefulWidget {
   final String noteId;
+  final List<String> batchNoteIds;
 
-  const EditNotePage({super.key, required this.noteId});
+  const EditNotePage({
+    super.key,
+    required this.noteId,
+    this.batchNoteIds = const <String>[],
+  });
 
   @override
   ConsumerState<EditNotePage> createState() => _EditNotePageState();
@@ -20,12 +26,21 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
   final _contentController = TextEditingController();
   final _symbolController = TextEditingController();
   final _timeframeController = TextEditingController();
+  final _newTagController = TextEditingController();
+  final _uuid = const Uuid();
 
   DateTime? _tradeTime;
   bool _isFavorite = false;
   Set<String> _selectedTagIds = <String>{};
   Note? _loadedNote;
   bool _saving = false;
+  late final Future<Note?> _noteFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteFuture = ref.read(noteRepositoryProvider).getNoteById(widget.noteId);
+  }
 
   @override
   void dispose() {
@@ -33,7 +48,41 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
     _contentController.dispose();
     _symbolController.dispose();
     _timeframeController.dispose();
+    _newTagController.dispose();
     super.dispose();
+  }
+
+  Future<void> _createTag() async {
+    final name = _newTagController.text.trim();
+    if (name.isEmpty) return;
+
+    final tagRepository = ref.read(tagRepositoryProvider);
+    final now = DateTime.now();
+    final existing = await tagRepository.getTagByName(name);
+
+    final tag = existing ??
+        Tag(
+          id: _uuid.v4(),
+          name: name,
+          createdAt: now,
+          updatedAt: now,
+        );
+
+    if (existing == null) {
+      await tagRepository.createTag(tag);
+    }
+
+    ref.invalidate(allTagsProvider);
+    if (!mounted) return;
+    setState(() {
+      _selectedTagIds.add(tag.id);
+      _newTagController.clear();
+    });
+  }
+
+  Future<void> _openTagManager() async {
+    await context.push('/tags');
+    ref.invalidate(allTagsProvider);
   }
 
   Future<void> _pickTradeDateTime() async {
@@ -67,6 +116,12 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
     setState(() => _saving = true);
     try {
       final repo = ref.read(noteRepositoryProvider);
+      final tagRepo = ref.read(tagRepositoryProvider);
+      final validTagIds =
+          (await tagRepo.getAllTags()).map((tag) => tag.id).toSet();
+      final selectedTagIds =
+          _selectedTagIds.where((id) => validTagIds.contains(id)).toList();
+
       await repo.updateNote(
         note.copyWith(
           title: _titleController.text.trim().isEmpty
@@ -83,14 +138,34 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
               : _timeframeController.text.trim(),
           tradeTime: _tradeTime,
           isFavorite: _isFavorite,
-          tagIds: _selectedTagIds.toList(),
+          tagIds: selectedTagIds,
           updatedAt: DateTime.now(),
         ),
       );
 
+      final batchTargetIds =
+          widget.batchNoteIds.where((id) => id != note.id).toSet().toList();
+      if (batchTargetIds.isNotEmpty) {
+        for (final batchNoteId in batchTargetIds) {
+          final batchNote = await repo.getNoteById(batchNoteId);
+          if (batchNote == null) continue;
+          await repo.updateNote(
+            batchNote.copyWith(
+              tagIds: selectedTagIds,
+              updatedAt: DateTime.now(),
+            ),
+          );
+        }
+      }
+
       ref.read(notesRefreshTickProvider.notifier).state++;
       if (!mounted) return;
-      context.pop();
+      _exitAfterAction();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${AppStrings.of(ref, 'saveFailed')}: $e')),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -125,16 +200,25 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppStrings.of(ref, 'deleted'))),
       );
-      context.pop();
+      _exitAfterAction();
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
+  void _exitAfterAction() {
+    if (!mounted) return;
+    if (Navigator.of(context).canPop()) {
+      context.pop();
+      return;
+    }
+    context.go('/flow');
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Note?>(
-      future: ref.read(noteRepositoryProvider).getNoteById(widget.noteId),
+      future: _noteFuture,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
@@ -185,12 +269,14 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: AppStrings.of(ref, 'title')),
+                decoration:
+                    InputDecoration(labelText: AppStrings.of(ref, 'title')),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _contentController,
-                decoration: InputDecoration(labelText: AppStrings.of(ref, 'content')),
+                decoration:
+                    InputDecoration(labelText: AppStrings.of(ref, 'content')),
                 minLines: 2,
                 maxLines: 4,
               ),
@@ -199,43 +285,89 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
                 loading: () => const LinearProgressIndicator(),
                 error: (error, _) =>
                     Text('${AppStrings.of(ref, 'tagLoadFailed')}: $error'),
-                data: (tags) => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: tags
-                      .map(
-                        (tag) => FilterChip(
-                          selected: _selectedTagIds.contains(tag.id),
-                          label: Text(tag.name),
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedTagIds.add(tag.id);
-                              } else {
-                                _selectedTagIds.remove(tag.id);
-                              }
-                            });
-                          },
+                data: (tags) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppStrings.of(ref, 'tags'),
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
-                      )
-                      .toList(),
+                        TextButton.icon(
+                          onPressed: _openTagManager,
+                          icon: const Icon(Icons.settings_outlined, size: 16),
+                          label: Text(AppStrings.of(ref, 'manageTags')),
+                        ),
+                      ],
+                    ),
+                    if (tags.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          AppStrings.of(ref, 'manageTagsHint'),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: tags
+                          .map(
+                            (tag) => FilterChip(
+                              selected: _selectedTagIds.contains(tag.id),
+                              label: Text(tag.name),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedTagIds.add(tag.id);
+                                  } else {
+                                    _selectedTagIds.remove(tag.id);
+                                  }
+                                });
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _newTagController,
+                            decoration: InputDecoration(
+                              hintText: AppStrings.of(ref, 'createNewTag'),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: _createTag,
+                          icon: const Icon(Icons.add),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _symbolController,
-                decoration: InputDecoration(labelText: AppStrings.of(ref, 'symbol')),
+                decoration:
+                    InputDecoration(labelText: AppStrings.of(ref, 'symbol')),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _timeframeController,
-                decoration: InputDecoration(labelText: AppStrings.of(ref, 'timeframe')),
+                decoration:
+                    InputDecoration(labelText: AppStrings.of(ref, 'timeframe')),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(AppStrings.of(ref, 'tradeTime')),
-                subtitle:
-                    Text(_tradeTime?.toLocal().toString() ?? AppStrings.of(ref, 'notSet')),
+                subtitle: Text(_tradeTime?.toLocal().toString() ??
+                    AppStrings.of(ref, 'notSet')),
                 trailing: TextButton(
                   onPressed: _pickTradeDateTime,
                   child: Text(AppStrings.of(ref, 'select')),

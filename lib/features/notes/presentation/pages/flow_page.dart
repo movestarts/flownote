@@ -73,6 +73,15 @@ class _FlowPageState extends ConsumerState<FlowPage> {
     );
   }
 
+  void _backToPreviousOrHome() {
+    if (!mounted) return;
+    if (Navigator.of(context).canPop()) {
+      context.pop();
+      return;
+    }
+    context.go('/');
+  }
+
   @override
   Widget build(BuildContext context) {
     final notesAsync = ref.watch(notesByQueryProvider(widget.query));
@@ -80,6 +89,10 @@ class _FlowPageState extends ConsumerState<FlowPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _backToPreviousOrHome,
+        ),
         title: Text(
           widget.query.isEmpty
               ? AppStrings.of(ref, 'flow')
@@ -132,7 +145,8 @@ class _FlowPageState extends ConsumerState<FlowPage> {
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(16),

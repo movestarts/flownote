@@ -43,6 +43,12 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
   Set<String> _selectedTagIds = <String>{};
 
   @override
+  void initState() {
+    super.initState();
+    _loadRecentDefaults();
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
@@ -56,21 +62,31 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
     if (_loadedDefaults) return;
     _loadedDefaults = true;
 
-    final recentRepo = ref.read(recentUsageRepositoryProvider);
-    final symbolValues =
-        await recentRepo.getRecentFieldValues(_recentSymbolField, limit: 1);
-    final timeframeValues =
-        await recentRepo.getRecentFieldValues(_recentTimeframeField, limit: 1);
-    final tagIds =
-        await recentRepo.getRecentFieldValues(_recentTagField, limit: 5);
+    try {
+      final recentRepo = ref.read(recentUsageRepositoryProvider);
+      final symbolValues =
+          await recentRepo.getRecentFieldValues(_recentSymbolField, limit: 1);
+      final timeframeValues = await recentRepo
+          .getRecentFieldValues(_recentTimeframeField, limit: 1);
+      final tagIds =
+          await recentRepo.getRecentFieldValues(_recentTagField, limit: 5);
 
-    if (!mounted) return;
-    setState(() {
-      _symbolController.text = symbolValues.isEmpty ? '' : symbolValues.first;
-      _timeframeController.text =
-          timeframeValues.isEmpty ? '' : timeframeValues.first;
-      _selectedTagIds = tagIds.toSet();
-    });
+      if (!mounted) return;
+      setState(() {
+        if (_symbolController.text.trim().isEmpty && symbolValues.isNotEmpty) {
+          _symbolController.text = symbolValues.first;
+        }
+        if (_timeframeController.text.trim().isEmpty &&
+            timeframeValues.isNotEmpty) {
+          _timeframeController.text = timeframeValues.first;
+        }
+        if (_selectedTagIds.isEmpty) {
+          _selectedTagIds = tagIds.toSet();
+        }
+      });
+    } catch (_) {
+      // Ignore recent-default loading failure; create flow should remain usable.
+    }
   }
 
   Future<void> _pickImage() async {
@@ -126,8 +142,13 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
 
     try {
       final noteRepository = ref.read(noteRepositoryProvider);
+      final tagRepository = ref.read(tagRepositoryProvider);
       final fileService = ref.read(localFileServiceProvider);
       final recentRepo = ref.read(recentUsageRepositoryProvider);
+      final validTagIds =
+          (await tagRepository.getAllTags()).map((tag) => tag.id).toSet();
+      final selectedTagIds =
+          _selectedTagIds.where((id) => validTagIds.contains(id)).toList();
 
       final imagePath =
           await fileService.copyImageToAppDirectory(_sourceImagePath!);
@@ -148,7 +169,7 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
         isFavorite: _isFavorite,
         createdAt: now,
         updatedAt: now,
-        tagIds: _selectedTagIds.toList(),
+        tagIds: selectedTagIds,
       );
 
       await noteRepository.createNote(note);
@@ -159,7 +180,7 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
       if (timeframe.isNotEmpty) {
         await recentRepo.recordUsage(_recentTimeframeField, timeframe);
       }
-      for (final tagId in _selectedTagIds) {
+      for (final tagId in selectedTagIds) {
         await recentRepo.recordUsage(_recentTagField, tagId);
       }
 
@@ -174,9 +195,14 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
           _contentController.clear();
           _tradeTime = null;
           _isFavorite = false;
+          _selectedTagIds = selectedTagIds.toSet();
         });
       } else {
-        context.pop();
+        if (Navigator.of(context).canPop()) {
+          context.pop();
+        } else {
+          context.go('/flow');
+        }
       }
     } catch (e) {
       _showMessage('${AppStrings.of(ref, 'saveFailed')}: $e');
@@ -224,7 +250,6 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
   @override
   Widget build(BuildContext context) {
     final tagsAsync = ref.watch(allTagsProvider);
-    _loadRecentDefaults();
 
     return Scaffold(
       appBar: AppBar(
@@ -349,8 +374,8 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(AppStrings.of(ref, 'tradeTime')),
-              subtitle:
-                  Text(_tradeTime?.toLocal().toString() ?? AppStrings.of(ref, 'notSet')),
+              subtitle: Text(_tradeTime?.toLocal().toString() ??
+                  AppStrings.of(ref, 'notSet')),
               trailing: TextButton(
                 onPressed: _pickTradeDateTime,
                 child: Text(AppStrings.of(ref, 'select')),
