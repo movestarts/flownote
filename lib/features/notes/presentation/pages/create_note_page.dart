@@ -116,7 +116,7 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
   Future<void> _saveNote({required bool keepEditing}) async {
     if (!_formKey.currentState!.validate()) return;
     if (_sourceImagePath == null) {
-      _showMessage('Please select an image first.');
+      _showMessage(AppStrings.of(ref, 'selectImageFirst'));
       return;
     }
 
@@ -166,7 +166,7 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
       ref.read(notesRefreshTickProvider.notifier).state++;
 
       if (!mounted) return;
-      _showMessage('Saved');
+      _showMessage(AppStrings.of(ref, 'saveSuccess'));
       if (keepEditing) {
         setState(() {
           _sourceImagePath = null;
@@ -179,7 +179,7 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
         context.pop();
       }
     } catch (e) {
-      _showMessage('Save failed: $e');
+      _showMessage('${AppStrings.of(ref, 'saveFailed')}: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -349,7 +349,8 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(AppStrings.of(ref, 'tradeTime')),
-              subtitle: Text(_tradeTime?.toLocal().toString() ?? 'Not set'),
+              subtitle:
+                  Text(_tradeTime?.toLocal().toString() ?? AppStrings.of(ref, 'notSet')),
               trailing: TextButton(
                 onPressed: _pickTradeDateTime,
                 child: Text(AppStrings.of(ref, 'select')),

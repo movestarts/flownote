@@ -1,3 +1,4 @@
+import 'package:chart_flow/app/l10n/app_strings.dart';
 import 'package:chart_flow/core/domain/entities.dart';
 import 'package:chart_flow/features/notes/providers/note_providers.dart';
 import 'package:chart_flow/features/tags/providers/tag_providers.dart';
@@ -99,16 +100,16 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除笔记?'),
-        content: const Text('删除后，这条笔记将不会再显示在列表中。'),
+        title: Text(AppStrings.of(ref, 'deleteNoteTitle')),
+        content: Text(AppStrings.of(ref, 'deleteNoteHint')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(AppStrings.of(ref, 'cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除'),
+            child: Text(AppStrings.of(ref, 'delete')),
           ),
         ],
       ),
@@ -122,7 +123,7 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
       ref.read(notesRefreshTickProvider.notifier).state++;
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已删除笔记')),
+        SnackBar(content: Text(AppStrings.of(ref, 'deleted'))),
       );
       context.pop();
     } finally {
@@ -143,8 +144,8 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
 
         final note = snapshot.data;
         if (note == null) {
-          return const Scaffold(
-            body: Center(child: Text('笔记不存在')),
+          return Scaffold(
+            body: Center(child: Text(AppStrings.of(ref, 'noteNotFound'))),
           );
         }
 
@@ -163,19 +164,19 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('编辑笔记'),
+            title: Text(AppStrings.of(ref, 'editNote')),
             actions: [
               TextButton.icon(
                 onPressed: _saving ? null : _delete,
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
-                label: const Text(
-                  '删除',
-                  style: TextStyle(color: Colors.red),
+                label: Text(
+                  AppStrings.of(ref, 'delete'),
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
               TextButton(
                 onPressed: _saving ? null : _save,
-                child: const Text('保存'),
+                child: Text(AppStrings.of(ref, 'save')),
               ),
             ],
           ),
@@ -184,19 +185,20 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: '标题'),
+                decoration: InputDecoration(labelText: AppStrings.of(ref, 'title')),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _contentController,
-                decoration: const InputDecoration(labelText: '备注'),
+                decoration: InputDecoration(labelText: AppStrings.of(ref, 'content')),
                 minLines: 2,
                 maxLines: 4,
               ),
               const SizedBox(height: 12),
               tagsAsync.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (error, _) => Text('标签加载失败: $error'),
+                error: (error, _) =>
+                    Text('${AppStrings.of(ref, 'tagLoadFailed')}: $error'),
                 data: (tags) => Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -222,25 +224,26 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _symbolController,
-                decoration: const InputDecoration(labelText: '品种'),
+                decoration: InputDecoration(labelText: AppStrings.of(ref, 'symbol')),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _timeframeController,
-                decoration: const InputDecoration(labelText: '周期'),
+                decoration: InputDecoration(labelText: AppStrings.of(ref, 'timeframe')),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('时间'),
-                subtitle: Text(_tradeTime?.toLocal().toString() ?? '未设置'),
+                title: Text(AppStrings.of(ref, 'tradeTime')),
+                subtitle:
+                    Text(_tradeTime?.toLocal().toString() ?? AppStrings.of(ref, 'notSet')),
                 trailing: TextButton(
                   onPressed: _pickTradeDateTime,
-                  child: const Text('选择'),
+                  child: Text(AppStrings.of(ref, 'select')),
                 ),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('收藏'),
+                title: Text(AppStrings.of(ref, 'favorite')),
                 value: _isFavorite,
                 onChanged: (value) => setState(() => _isFavorite = value),
               ),

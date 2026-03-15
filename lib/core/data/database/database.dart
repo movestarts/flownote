@@ -13,7 +13,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -29,6 +29,12 @@ class AppDatabase extends _$AppDatabase {
           await customStatement('DROP TABLE IF EXISTS saved_filters;');
           await customStatement('DROP TABLE IF EXISTS recent_usages;');
           await m.createAll();
+        }
+        if (from < 3) {
+          // 添加交易方向、结果和盈亏点数字段
+          await customStatement('ALTER TABLE notes ADD COLUMN direction TEXT;');
+          await customStatement('ALTER TABLE notes ADD COLUMN result TEXT;');
+          await customStatement('ALTER TABLE notes ADD COLUMN profit_points REAL;');
         }
       },
     );
@@ -46,3 +52,4 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(file);
   });
 }
+

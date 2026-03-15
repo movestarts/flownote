@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chart_flow/app/l10n/app_strings.dart';
 import 'package:chart_flow/core/domain/entities.dart';
 import 'package:chart_flow/core/widgets/empty_state_widget.dart';
 import 'package:chart_flow/features/notes/providers/note_providers.dart';
@@ -45,16 +46,16 @@ class _FlowPageState extends ConsumerState<FlowPage> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete note?'),
-        content: const Text('This note will be hidden from your note list.'),
+        title: Text(AppStrings.of(ref, 'deleteNoteTitle')),
+        content: Text(AppStrings.of(ref, 'deleteNoteHint')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppStrings.of(ref, 'cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(AppStrings.of(ref, 'delete')),
           ),
         ],
       ),
@@ -68,7 +69,7 @@ class _FlowPageState extends ConsumerState<FlowPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Note deleted')),
+      SnackBar(content: Text(AppStrings.of(ref, 'deleted'))),
     );
   }
 
@@ -79,7 +80,11 @@ class _FlowPageState extends ConsumerState<FlowPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(widget.query.isEmpty ? 'Flow' : 'Filtered Flow'),
+        title: Text(
+          widget.query.isEmpty
+              ? AppStrings.of(ref, 'flow')
+              : AppStrings.of(ref, 'filteredFlow'),
+        ),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         actions: [
@@ -93,15 +98,15 @@ class _FlowPageState extends ConsumerState<FlowPage> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Text(
-            'Load failed: $error',
+            '${AppStrings.of(ref, 'loadFailed')}: $error',
             style: const TextStyle(color: Colors.white),
           ),
         ),
         data: (notes) {
           if (notes.isEmpty) {
-            return const EmptyStateWidget(
-              title: 'No notes found',
-              subtitle: 'Try importing an image or adjusting filters.',
+            return EmptyStateWidget(
+              title: AppStrings.of(ref, 'noNotesFound'),
+              subtitle: AppStrings.of(ref, 'noNotesFoundHint'),
               icon: Icons.image_not_supported_outlined,
             );
           }
@@ -127,8 +132,7 @@ class _FlowPageState extends ConsumerState<FlowPage> {
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(16),
@@ -147,7 +151,7 @@ class _FlowPageState extends ConsumerState<FlowPage> {
   }
 }
 
-class _FlowCard extends StatelessWidget {
+class _FlowCard extends ConsumerWidget {
   final Note note;
   final VoidCallback onToggleFavorite;
   final VoidCallback onEdit;
@@ -161,7 +165,7 @@ class _FlowCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -192,19 +196,21 @@ class _FlowCard extends StatelessWidget {
             children: [
               _quickActionButton(
                 icon: note.isFavorite ? Icons.bookmark : Icons.bookmark_border,
-                label: note.isFavorite ? '已收藏' : '收藏',
+                label: note.isFavorite
+                    ? AppStrings.of(ref, 'favorite')
+                    : AppStrings.of(ref, 'favorite'),
                 onTap: onToggleFavorite,
               ),
               const SizedBox(height: 8),
               _quickActionButton(
                 icon: Icons.edit_outlined,
-                label: '编辑',
+                label: AppStrings.of(ref, 'editNote'),
                 onTap: onEdit,
               ),
               const SizedBox(height: 8),
               _quickActionButton(
                 icon: Icons.delete_outline,
-                label: '删除',
+                label: AppStrings.of(ref, 'delete'),
                 onTap: onDelete,
                 foregroundColor: Colors.red.shade100,
                 borderColor: Colors.red.shade200.withValues(alpha: 0.65),
@@ -235,9 +241,10 @@ class _FlowCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600),
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
               if (note.content != null && note.content!.trim().isNotEmpty) ...[

@@ -51,3 +51,6 @@ android/local.properties
 ios/Flutter/ephemeral/
 ios/Flutter/Generated.xcconfig
 ios/Flutter/flutter_export_environment.sh
+
+# Environment variables
+.env.local

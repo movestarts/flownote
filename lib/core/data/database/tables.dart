@@ -7,6 +7,10 @@ class Notes extends Table {
   TextColumn get content => text().nullable()();
   TextColumn get symbol => text().nullable()();
   TextColumn get timeframe => text().nullable()();
+  TextColumn get direction => text().nullable()(); // L/S/O (Long/Short/Observe)
+  TextColumn get result => text().nullable()(); // P/L/O/M (Profit/Loss/Observe/Missed)
+    Column<double> get profitPoints =>
+      real().named('profit_points').nullable()();
   DateTimeColumn get tradeTime => dateTime().named('trade_time').nullable()();
   BoolColumn get isFavorite =>
       boolean().named('is_favorite').withDefault(const Constant(false))();

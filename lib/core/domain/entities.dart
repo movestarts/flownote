@@ -5,6 +5,9 @@ class Note {
   final String? content;
   final String? symbol;
   final String? timeframe;
+  final String? direction; // L/S/O (Long/Short/Observe)
+  final String? result; // P/L/O/M (Profit/Loss/Observe/Missed)
+  final double? profitPoints; // 盈亏点数
   final DateTime? tradeTime;
   final bool isFavorite;
   final DateTime createdAt;
@@ -20,6 +23,9 @@ class Note {
     this.content,
     this.symbol,
     this.timeframe,
+    this.direction,
+    this.result,
+    this.profitPoints,
     this.tradeTime,
     this.isFavorite = false,
     required this.createdAt,
@@ -36,6 +42,9 @@ class Note {
     String? content,
     String? symbol,
     String? timeframe,
+    String? direction,
+    String? result,
+    double? profitPoints,
     DateTime? tradeTime,
     bool? isFavorite,
     DateTime? createdAt,
@@ -51,6 +60,9 @@ class Note {
       content: content ?? this.content,
       symbol: symbol ?? this.symbol,
       timeframe: timeframe ?? this.timeframe,
+      direction: direction ?? this.direction,
+      result: result ?? this.result,
+      profitPoints: profitPoints ?? this.profitPoints,
       tradeTime: tradeTime ?? this.tradeTime,
       isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,

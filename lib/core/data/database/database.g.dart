@@ -41,6 +41,23 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
   late final GeneratedColumn<String> timeframe = GeneratedColumn<String>(
       'timeframe', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _directionMeta =
+      const VerificationMeta('direction');
+  @override
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+      'direction', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _resultMeta = const VerificationMeta('result');
+  @override
+  late final GeneratedColumn<String> result = GeneratedColumn<String>(
+      'result', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _profitPointsMeta =
+      const VerificationMeta('profitPoints');
+  @override
+  late final GeneratedColumn<double> profitPoints = GeneratedColumn<double>(
+      'profit_points', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _tradeTimeMeta =
       const VerificationMeta('tradeTime');
   @override
@@ -83,6 +100,9 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
         content,
         symbol,
         timeframe,
+        direction,
+        result,
+        profitPoints,
         tradeTime,
         isFavorite,
         createdAt,
@@ -125,6 +145,20 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     if (data.containsKey('timeframe')) {
       context.handle(_timeframeMeta,
           timeframe.isAcceptableOrUnknown(data['timeframe']!, _timeframeMeta));
+    }
+    if (data.containsKey('direction')) {
+      context.handle(_directionMeta,
+          direction.isAcceptableOrUnknown(data['direction']!, _directionMeta));
+    }
+    if (data.containsKey('result')) {
+      context.handle(_resultMeta,
+          result.isAcceptableOrUnknown(data['result']!, _resultMeta));
+    }
+    if (data.containsKey('profit_points')) {
+      context.handle(
+          _profitPointsMeta,
+          profitPoints.isAcceptableOrUnknown(
+              data['profit_points']!, _profitPointsMeta));
     }
     if (data.containsKey('trade_time')) {
       context.handle(_tradeTimeMeta,
@@ -173,6 +207,12 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
           .read(DriftSqlType.string, data['${effectivePrefix}symbol']),
       timeframe: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}timeframe']),
+      direction: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}direction']),
+      result: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}result']),
+      profitPoints: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}profit_points']),
       tradeTime: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}trade_time']),
       isFavorite: attachedDatabase.typeMapping
@@ -199,6 +239,9 @@ class Note extends DataClass implements Insertable<Note> {
   final String? content;
   final String? symbol;
   final String? timeframe;
+  final String? direction;
+  final String? result;
+  final double? profitPoints;
   final DateTime? tradeTime;
   final bool isFavorite;
   final DateTime createdAt;
@@ -211,6 +254,9 @@ class Note extends DataClass implements Insertable<Note> {
       this.content,
       this.symbol,
       this.timeframe,
+      this.direction,
+      this.result,
+      this.profitPoints,
       this.tradeTime,
       required this.isFavorite,
       required this.createdAt,
@@ -232,6 +278,15 @@ class Note extends DataClass implements Insertable<Note> {
     }
     if (!nullToAbsent || timeframe != null) {
       map['timeframe'] = Variable<String>(timeframe);
+    }
+    if (!nullToAbsent || direction != null) {
+      map['direction'] = Variable<String>(direction);
+    }
+    if (!nullToAbsent || result != null) {
+      map['result'] = Variable<String>(result);
+    }
+    if (!nullToAbsent || profitPoints != null) {
+      map['profit_points'] = Variable<double>(profitPoints);
     }
     if (!nullToAbsent || tradeTime != null) {
       map['trade_time'] = Variable<DateTime>(tradeTime);
@@ -259,6 +314,14 @@ class Note extends DataClass implements Insertable<Note> {
       timeframe: timeframe == null && nullToAbsent
           ? const Value.absent()
           : Value(timeframe),
+      direction: direction == null && nullToAbsent
+          ? const Value.absent()
+          : Value(direction),
+      result:
+          result == null && nullToAbsent ? const Value.absent() : Value(result),
+      profitPoints: profitPoints == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profitPoints),
       tradeTime: tradeTime == null && nullToAbsent
           ? const Value.absent()
           : Value(tradeTime),
@@ -281,6 +344,9 @@ class Note extends DataClass implements Insertable<Note> {
       content: serializer.fromJson<String?>(json['content']),
       symbol: serializer.fromJson<String?>(json['symbol']),
       timeframe: serializer.fromJson<String?>(json['timeframe']),
+      direction: serializer.fromJson<String?>(json['direction']),
+      result: serializer.fromJson<String?>(json['result']),
+      profitPoints: serializer.fromJson<double?>(json['profitPoints']),
       tradeTime: serializer.fromJson<DateTime?>(json['tradeTime']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -298,6 +364,9 @@ class Note extends DataClass implements Insertable<Note> {
       'content': serializer.toJson<String?>(content),
       'symbol': serializer.toJson<String?>(symbol),
       'timeframe': serializer.toJson<String?>(timeframe),
+      'direction': serializer.toJson<String?>(direction),
+      'result': serializer.toJson<String?>(result),
+      'profitPoints': serializer.toJson<double?>(profitPoints),
       'tradeTime': serializer.toJson<DateTime?>(tradeTime),
       'isFavorite': serializer.toJson<bool>(isFavorite),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -313,6 +382,9 @@ class Note extends DataClass implements Insertable<Note> {
           Value<String?> content = const Value.absent(),
           Value<String?> symbol = const Value.absent(),
           Value<String?> timeframe = const Value.absent(),
+          Value<String?> direction = const Value.absent(),
+          Value<String?> result = const Value.absent(),
+          Value<double?> profitPoints = const Value.absent(),
           Value<DateTime?> tradeTime = const Value.absent(),
           bool? isFavorite,
           DateTime? createdAt,
@@ -325,6 +397,10 @@ class Note extends DataClass implements Insertable<Note> {
         content: content.present ? content.value : this.content,
         symbol: symbol.present ? symbol.value : this.symbol,
         timeframe: timeframe.present ? timeframe.value : this.timeframe,
+        direction: direction.present ? direction.value : this.direction,
+        result: result.present ? result.value : this.result,
+        profitPoints:
+            profitPoints.present ? profitPoints.value : this.profitPoints,
         tradeTime: tradeTime.present ? tradeTime.value : this.tradeTime,
         isFavorite: isFavorite ?? this.isFavorite,
         createdAt: createdAt ?? this.createdAt,
@@ -339,6 +415,11 @@ class Note extends DataClass implements Insertable<Note> {
       content: data.content.present ? data.content.value : this.content,
       symbol: data.symbol.present ? data.symbol.value : this.symbol,
       timeframe: data.timeframe.present ? data.timeframe.value : this.timeframe,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      result: data.result.present ? data.result.value : this.result,
+      profitPoints: data.profitPoints.present
+          ? data.profitPoints.value
+          : this.profitPoints,
       tradeTime: data.tradeTime.present ? data.tradeTime.value : this.tradeTime,
       isFavorite:
           data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
@@ -357,6 +438,9 @@ class Note extends DataClass implements Insertable<Note> {
           ..write('content: $content, ')
           ..write('symbol: $symbol, ')
           ..write('timeframe: $timeframe, ')
+          ..write('direction: $direction, ')
+          ..write('result: $result, ')
+          ..write('profitPoints: $profitPoints, ')
           ..write('tradeTime: $tradeTime, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('createdAt: $createdAt, ')
@@ -367,8 +451,21 @@ class Note extends DataClass implements Insertable<Note> {
   }
 
   @override
-  int get hashCode => Object.hash(id, imagePath, title, content, symbol,
-      timeframe, tradeTime, isFavorite, createdAt, updatedAt, deletedAt);
+  int get hashCode => Object.hash(
+      id,
+      imagePath,
+      title,
+      content,
+      symbol,
+      timeframe,
+      direction,
+      result,
+      profitPoints,
+      tradeTime,
+      isFavorite,
+      createdAt,
+      updatedAt,
+      deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -379,6 +476,9 @@ class Note extends DataClass implements Insertable<Note> {
           other.content == this.content &&
           other.symbol == this.symbol &&
           other.timeframe == this.timeframe &&
+          other.direction == this.direction &&
+          other.result == this.result &&
+          other.profitPoints == this.profitPoints &&
           other.tradeTime == this.tradeTime &&
           other.isFavorite == this.isFavorite &&
           other.createdAt == this.createdAt &&
@@ -393,6 +493,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
   final Value<String?> content;
   final Value<String?> symbol;
   final Value<String?> timeframe;
+  final Value<String?> direction;
+  final Value<String?> result;
+  final Value<double?> profitPoints;
   final Value<DateTime?> tradeTime;
   final Value<bool> isFavorite;
   final Value<DateTime> createdAt;
@@ -406,6 +509,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.content = const Value.absent(),
     this.symbol = const Value.absent(),
     this.timeframe = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.result = const Value.absent(),
+    this.profitPoints = const Value.absent(),
     this.tradeTime = const Value.absent(),
     this.isFavorite = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -420,6 +526,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.content = const Value.absent(),
     this.symbol = const Value.absent(),
     this.timeframe = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.result = const Value.absent(),
+    this.profitPoints = const Value.absent(),
     this.tradeTime = const Value.absent(),
     this.isFavorite = const Value.absent(),
     required DateTime createdAt,
@@ -437,6 +546,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Expression<String>? content,
     Expression<String>? symbol,
     Expression<String>? timeframe,
+    Expression<String>? direction,
+    Expression<String>? result,
+    Expression<double>? profitPoints,
     Expression<DateTime>? tradeTime,
     Expression<bool>? isFavorite,
     Expression<DateTime>? createdAt,
@@ -451,6 +563,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
       if (content != null) 'content': content,
       if (symbol != null) 'symbol': symbol,
       if (timeframe != null) 'timeframe': timeframe,
+      if (direction != null) 'direction': direction,
+      if (result != null) 'result': result,
+      if (profitPoints != null) 'profit_points': profitPoints,
       if (tradeTime != null) 'trade_time': tradeTime,
       if (isFavorite != null) 'is_favorite': isFavorite,
       if (createdAt != null) 'created_at': createdAt,
@@ -467,6 +582,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
       Value<String?>? content,
       Value<String?>? symbol,
       Value<String?>? timeframe,
+      Value<String?>? direction,
+      Value<String?>? result,
+      Value<double?>? profitPoints,
       Value<DateTime?>? tradeTime,
       Value<bool>? isFavorite,
       Value<DateTime>? createdAt,
@@ -480,6 +598,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
       content: content ?? this.content,
       symbol: symbol ?? this.symbol,
       timeframe: timeframe ?? this.timeframe,
+      direction: direction ?? this.direction,
+      result: result ?? this.result,
+      profitPoints: profitPoints ?? this.profitPoints,
       tradeTime: tradeTime ?? this.tradeTime,
       isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
@@ -509,6 +630,15 @@ class NotesCompanion extends UpdateCompanion<Note> {
     }
     if (timeframe.present) {
       map['timeframe'] = Variable<String>(timeframe.value);
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
+    }
+    if (result.present) {
+      map['result'] = Variable<String>(result.value);
+    }
+    if (profitPoints.present) {
+      map['profit_points'] = Variable<double>(profitPoints.value);
     }
     if (tradeTime.present) {
       map['trade_time'] = Variable<DateTime>(tradeTime.value);
@@ -540,6 +670,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
           ..write('content: $content, ')
           ..write('symbol: $symbol, ')
           ..write('timeframe: $timeframe, ')
+          ..write('direction: $direction, ')
+          ..write('result: $result, ')
+          ..write('profitPoints: $profitPoints, ')
           ..write('tradeTime: $tradeTime, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('createdAt: $createdAt, ')
@@ -1717,6 +1850,9 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   Value<String?> content,
   Value<String?> symbol,
   Value<String?> timeframe,
+  Value<String?> direction,
+  Value<String?> result,
+  Value<double?> profitPoints,
   Value<DateTime?> tradeTime,
   Value<bool> isFavorite,
   required DateTime createdAt,
@@ -1731,6 +1867,9 @@ typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<String?> content,
   Value<String?> symbol,
   Value<String?> timeframe,
+  Value<String?> direction,
+  Value<String?> result,
+  Value<double?> profitPoints,
   Value<DateTime?> tradeTime,
   Value<bool> isFavorite,
   Value<DateTime> createdAt,
@@ -1783,6 +1922,15 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
 
   ColumnFilters<String> get timeframe => $composableBuilder(
       column: $table.timeframe, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get direction => $composableBuilder(
+      column: $table.direction, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get result => $composableBuilder(
+      column: $table.result, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get profitPoints => $composableBuilder(
+      column: $table.profitPoints, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get tradeTime => $composableBuilder(
       column: $table.tradeTime, builder: (column) => ColumnFilters(column));
@@ -1848,6 +1996,16 @@ class $$NotesTableOrderingComposer
   ColumnOrderings<String> get timeframe => $composableBuilder(
       column: $table.timeframe, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get direction => $composableBuilder(
+      column: $table.direction, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get result => $composableBuilder(
+      column: $table.result, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get profitPoints => $composableBuilder(
+      column: $table.profitPoints,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get tradeTime => $composableBuilder(
       column: $table.tradeTime, builder: (column) => ColumnOrderings(column));
 
@@ -1890,6 +2048,15 @@ class $$NotesTableAnnotationComposer
 
   GeneratedColumn<String> get timeframe =>
       $composableBuilder(column: $table.timeframe, builder: (column) => column);
+
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<String> get result =>
+      $composableBuilder(column: $table.result, builder: (column) => column);
+
+  GeneratedColumn<double> get profitPoints => $composableBuilder(
+      column: $table.profitPoints, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tradeTime =>
       $composableBuilder(column: $table.tradeTime, builder: (column) => column);
@@ -1957,6 +2124,9 @@ class $$NotesTableTableManager extends RootTableManager<
             Value<String?> content = const Value.absent(),
             Value<String?> symbol = const Value.absent(),
             Value<String?> timeframe = const Value.absent(),
+            Value<String?> direction = const Value.absent(),
+            Value<String?> result = const Value.absent(),
+            Value<double?> profitPoints = const Value.absent(),
             Value<DateTime?> tradeTime = const Value.absent(),
             Value<bool> isFavorite = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -1971,6 +2141,9 @@ class $$NotesTableTableManager extends RootTableManager<
             content: content,
             symbol: symbol,
             timeframe: timeframe,
+            direction: direction,
+            result: result,
+            profitPoints: profitPoints,
             tradeTime: tradeTime,
             isFavorite: isFavorite,
             createdAt: createdAt,
@@ -1985,6 +2158,9 @@ class $$NotesTableTableManager extends RootTableManager<
             Value<String?> content = const Value.absent(),
             Value<String?> symbol = const Value.absent(),
             Value<String?> timeframe = const Value.absent(),
+            Value<String?> direction = const Value.absent(),
+            Value<String?> result = const Value.absent(),
+            Value<double?> profitPoints = const Value.absent(),
             Value<DateTime?> tradeTime = const Value.absent(),
             Value<bool> isFavorite = const Value.absent(),
             required DateTime createdAt,
@@ -1999,6 +2175,9 @@ class $$NotesTableTableManager extends RootTableManager<
             content: content,
             symbol: symbol,
             timeframe: timeframe,
+            direction: direction,
+            result: result,
+            profitPoints: profitPoints,
             tradeTime: tradeTime,
             isFavorite: isFavorite,
             createdAt: createdAt,

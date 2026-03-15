@@ -11,6 +11,12 @@ final noteRepositoryProvider = Provider<NoteRepository>((ref) {
 
 final notesRefreshTickProvider = StateProvider<int>((ref) => 0);
 
+final allNotesProvider = FutureProvider<List<Note>>((ref) async {
+  ref.watch(notesRefreshTickProvider);
+  final repository = ref.watch(noteRepositoryProvider);
+  return repository.getAllNotes();
+});
+
 final notesByQueryProvider =
     FutureProvider.family<List<Note>, NoteQuery>((ref, query) async {
   ref.watch(notesRefreshTickProvider);
